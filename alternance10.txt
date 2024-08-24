@@ -1,0 +1,11 @@
+alternanciaCircular|10
+processo-0|0|20|79
+processo-1|1|70|67
+processo-2|2|30|60
+processo-3|3|50|54
+processo-4|4|30|39
+processo-5|5|60|37
+processo-6|6|10|79
+processo-7|7|40|85
+processo-8|8|60|73
+processo-9|9|30|83
