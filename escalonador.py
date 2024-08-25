@@ -87,11 +87,39 @@ def round_robin(file):
         
     
     
-    
-    
+def select_ticket(processos):
+    # Criar uma lista de bilhetes onde cada processo aparece na quantidade de bilhetes que possui
+    bilhetes = []
+    for processo in processos:
+        bilhetes.extend([processo.nome] * processo.prioridade)
+    # Selecionar um bilhete aleatório
+    processo_escolhido = random.choice(bilhetes)
+    return processo_escolhido
+
 
 def lotery():
-    pass
+    sys.stdout.write("\nInicio do escalonamento\n###################\n")
+    processos = listar_processos(file)
+    
+    prontos, finalizados = check_states(processos)
+
+    while True:
+        sys.stdout.write("Quantidade de processos: {}\n".format(len(prontos)))
+        sys.stdout.write("####### CPU #######\n")
+        processo_escolhido = select_ticket(prontos)
+        sys.stdout.write("\n## Processo: {}\n".format(processo_escolhido.name))
+        sys.stdout.write("Tempo antes de processar: {}\n".format(processo_escolhido.time_exec))
+        sys.stdout.write("Processando...\n")
+            
+        processo_escolhido.discount_quantum(quantum)
+
+        sys.stdout.write("Tempo restante: {}\n".format(processo_escolhido.time_exec))
+
+        if len(finalizados) == tam_processos:
+            sys.stdout.write("Todos os processos finalizados")
+            break
+
+
 
 def priority():
     pass
