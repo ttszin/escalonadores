@@ -1,0 +1,11 @@
+loteria|20
+processo-0|0|20|91
+processo-1|1|60|64
+processo-2|2|30|90
+processo-3|3|10|53
+processo-4|4|70|63
+processo-5|5|40|97
+processo-6|6|80|51
+processo-7|7|70|96
+processo-8|8|20|61
+processo-9|9|30|38

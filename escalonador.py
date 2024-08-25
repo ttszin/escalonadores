@@ -2,6 +2,7 @@ import sys
 import threading
 from tqdm import tqdm
 import time
+import random
 
 class Process():
     def __init__(self, name, PID, time_exec, prioridade):
@@ -91,18 +92,19 @@ def select_ticket(processos):
     # Criar uma lista de bilhetes onde cada processo aparece na quantidade de bilhetes que possui
     bilhetes = []
     for processo in processos:
-        bilhetes.extend([processo.nome] * processo.prioridade)
+        bilhetes.extend([processo] * processo.priority)
     # Selecionar um bilhete aleatório
     processo_escolhido = random.choice(bilhetes)
     return processo_escolhido
 
 
-def lotery():
+def lotery(file):
     sys.stdout.write("\nInicio do escalonamento\n###################\n")
     processos = listar_processos(file)
     
     prontos, finalizados = check_states(processos)
 
+    tam_processos = len(processos)
     while True:
         sys.stdout.write("Quantidade de processos: {}\n".format(len(prontos)))
         sys.stdout.write("####### CPU #######\n")
@@ -114,6 +116,8 @@ def lotery():
         processo_escolhido.discount_quantum(quantum)
 
         sys.stdout.write("Tempo restante: {}\n".format(processo_escolhido.time_exec))
+
+        prontos, finalizados = check_states(processos)
 
         if len(finalizados) == tam_processos:
             sys.stdout.write("Todos os processos finalizados")
@@ -138,7 +142,7 @@ if __name__ == "__main__":
     if type == "alternanciaCircular":
         round_robin(file)
     elif(type == "loteria"):
-        lotery()
+        lotery(file)
     elif(type == "prioridade"):
         priority()
     elif(type == "CFS"):
