@@ -1,0 +1,6 @@
+CFS|10
+processo-0|0|70|28
+processo-1|1|90|91
+processo-2|2|40|68
+processo-3|3|80|97
+processo-4|4|70|71

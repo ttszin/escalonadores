@@ -3,6 +3,7 @@ import threading
 from tqdm import tqdm
 import time
 import random
+import heapq
 
 #Classe de processos e seus atributos
 class Process():
@@ -13,6 +14,14 @@ class Process():
         self.priority = int(prioridade)
         self.time_exec = int(time_exec)
         self.time_processed = 0
+        self.tempo_usado = 0
+        self.tempo_virtual = 0  # Tempo virtual inicial
+
+    def __lt__(self, other):
+        return self.tempo_virtual < other.tempo_virtual
+
+    def __repr__(self):
+        return f"{self.nome} (PID: {self.pid}, Tempo Desejado: {self.tempo_desejado}, Tempo Usado: {self.tempo_usado}, Tempo Virtual: {self.tempo_virtual})"
 
         
     def discount_quantum(self,quantum):
@@ -127,7 +136,7 @@ def lotery(file):
 
 
 #Prioridade premptiva, em caso de empate de prioridades, o PID decide
-def priority():
+def priority(file):
     sys.stdout.write("\nInicio do escalonamento\n###################\n")
     processos = listar_processos(file)
     
@@ -156,8 +165,99 @@ def priority():
             sys.stdout.write("Todos os processos finalizados")
             break
 
-def cfs():
-    pass
+def cfs(file, quantum):
+    sys.stdout.write("\nInicio do escalonamento\n###################\n")
+    processos = listar_processos(file)
+    
+    prontos, finalizados = check_states(processos)
+
+    if not prontos:
+        sys.stdout.write("Nenhum processo pronto para ser executado.\n")
+        return
+
+    heapq.heapify(prontos)  # Cria uma heap baseada no tempo virtual dos processos
+    tam_processos = len(prontos)
+    
+    # Barra de progresso geral
+    with tqdm(total=tam_processos, desc="Progresso Geral", unit="processo", leave=False) as pbar:
+        while prontos:
+            sys.stdout.write("Quantidade de processos: {}\n".format(len(prontos)))
+            sys.stdout.write("####### CPU #######\n")
+            
+            if prontos:
+                processo_atual = heapq.heappop(prontos)
+            else:
+                break  # Se a lista estiver vazia, saia do loop
+            
+            tempo_execucao = min(quantum, processo_atual.time_exec - processo_atual.tempo_usado)
+            print(f"Executando {processo_atual.name} (PID: {processo_atual.pid}) por {tempo_execucao} unidades de tempo")
+            
+            # Barra de progresso individual para o processo
+            with tqdm(total=tempo_execucao, desc=f"Processo {processo_atual.name}", unit="tempo", leave=False) as proc_bar:
+                while tempo_execucao > 0:
+                    time.sleep(0.5)  # Simula o tempo de execução (0.5 segundos)
+                    processo_atual.tempo_usado += 1
+                    tempo_execucao -= 1
+                    processo_atual.time_exec -= 1
+                    proc_bar.update(1)  # Atualiza a barra com 1 unidade de tempo
+                    
+                    if processo_atual.time_exec <= 0:
+                        finalizados.append(processo_atual)  # Processo finalizado
+                        pbar.update(1)  # Atualiza o progresso geral
+                        break
+
+            if len(finalizados) == tam_processos:
+                sys.stdout.write("Todos os processos finalizados\n")
+                break
+            else:
+                processo_atual.tempo_virtual += quantum  # Atualiza o tempo virtual
+                heapq.heappush(prontos, processo_atual)  # Reinsere o processo na heap
+    sys.stdout.write("\nInicio do escalonamento\n###################\n")
+    processos = listar_processos(file)
+    
+    prontos, finalizados = check_states(processos)
+
+    if not prontos:
+        sys.stdout.write("Nenhum processo pronto para ser executado.\n")
+        return
+
+    heapq.heapify(prontos)  # Cria uma heap baseada no tempo virtual dos processos
+    tam_processos = len(prontos)
+    
+    # Barra de progresso geral
+    with tqdm(total=tam_processos, desc="Progresso Geral", unit="processo", leave=False) as pbar:
+        while prontos:
+            sys.stdout.write("Quantidade de processos: {}\n".format(len(prontos)))
+            sys.stdout.write("####### CPU #######\n")
+            
+            if prontos:
+                processo_atual = heapq.heappop(prontos)
+            else:
+                break  # Se a lista estiver vazia, saia do loop
+            
+            tempo_execucao = min(quantum, processo_atual.time_exec - processo_atual.tempo_usado)
+            print(f"Executando {processo_atual.name} (PID: {processo_atual.pid}) por {tempo_execucao} unidades de tempo")
+            
+            # Barra de progresso individual para o processo
+            with tqdm(total=processo_atual.time_exec, desc=f"Processo {processo_atual.name}", unit="tempo", leave=False) as proc_bar:
+                while tempo_execucao > 0:
+                    time.sleep(0.5)  # Simula o tempo de execução
+                    processo_atual.tempo_usado += tempo_execucao
+                    processo_atual.time_exec -= tempo_execucao
+                    proc_bar.update(tempo_execucao)
+                    
+                    if processo_atual.time_exec > 0:
+                        processo_atual.tempo_virtual += tempo_execucao  # Atualiza o tempo virtual
+                        heapq.heappush(prontos, processo_atual)  # Reinsere o processo na heap
+                        break  # O processo será reescalonado
+                    else:
+                        finalizados.append(processo_atual)  # Processo finalizado
+                        pbar.update(1)  # Atualiza o progresso geral
+                        break
+
+            if len(finalizados) == tam_processos:
+                sys.stdout.write("Todos os processos finalizados\n")
+                break
 
 
 
@@ -172,9 +272,9 @@ if __name__ == "__main__":
     elif(type == "loteria"):
         lotery(file)
     elif(type == "prioridade"):
-        priority()
+        priority(file)
     elif(type == "CFS"):
-        cfs()
+        cfs(file,quantum)
 
 
 
