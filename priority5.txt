@@ -1,0 +1,8 @@
+prioridade|10
+processo-0|0|40|44
+processo-1|1|40|36
+processo-2|2|50|68
+processo-3|3|30|37
+processo-4|4|50|73
+processo-5|5|20|73
+processo-6|6|20|73

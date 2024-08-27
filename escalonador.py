@@ -4,6 +4,7 @@ from tqdm import tqdm
 import time
 import random
 
+#Classe de processos e seus atributos
 class Process():
     def __init__(self, name, PID, time_exec, prioridade):
         # Inicializando os atributos da classe de processos
@@ -12,6 +13,7 @@ class Process():
         self.priority = int(prioridade)
         self.time_exec = int(time_exec)
         self.time_processed = 0
+
         
     def discount_quantum(self,quantum):
         for i in tqdm(range(quantum)):
@@ -20,7 +22,7 @@ class Process():
         self.time_processed = self.time_processed + quantum
         self.time_exec = self.time_exec-quantum
         
-
+#Função para pegar o Quantum do arquivo e qual o escalonador utilizado no cabeçalho do arquivo
 def file_stats(filename):
     # Abre o arquivo com os processos .
     with open(filename) as file_object:
@@ -124,9 +126,35 @@ def lotery(file):
             break
 
 
-
+#Prioridade premptiva, em caso de empate de prioridades, o PID decide
 def priority():
-    pass
+    sys.stdout.write("\nInicio do escalonamento\n###################\n")
+    processos = listar_processos(file)
+    
+    prontos, finalizados = check_states(processos)
+    processos_ordenados = sorted(prontos, key=lambda processo: (-processo.priority,processo.pid))
+    # Ordena por prioridade (decrescente) e depois por PID (crescente)
+
+    tam_processos = len(processos)
+    while True:
+        processos_ordenados = sorted(prontos, key=lambda processo: (-processo.priority,processo.pid))
+        sys.stdout.write("Quantidade de processos: {}\n".format(len(prontos)))
+        sys.stdout.write("####### CPU #######\n")
+        for proc in processos_ordenados:
+            sys.stdout.write("\n## Processo: {}\n".format(proc.name))
+            sys.stdout.write("Tempo antes de processar: {}\n".format(proc.time_exec))
+            sys.stdout.write("Processando...\n")
+                
+            proc.discount_quantum(quantum)
+
+            sys.stdout.write("Tempo restante: {}\n".format(proc.time_exec))
+
+            prontos, finalizados = check_states(processos)
+
+
+        if len(finalizados) == tam_processos:
+            sys.stdout.write("Todos os processos finalizados")
+            break
 
 def cfs():
     pass
